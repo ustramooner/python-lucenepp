@@ -1,0 +1,9 @@
+python/MANIFEST
+python/dist
+python/build
+python/samples/LuceneInAction/index/
+\#*
+*~
+*.orig
+*.bkup
+*.pyc

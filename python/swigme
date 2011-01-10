@@ -1,0 +1,125 @@
+#/bin/bash
+#
+quick=0
+testing=0
+swig=0
+TGTFOLDER=../src/
+
+if [ "$1" = "-t" ] || [ "$SWIG_TESTING" != "" ]; then 
+  testing=1; shift;
+fi
+
+
+if [ "$1" = "-q" ]; then quick=1; shift; fi
+if [ "$1" = "-s" ]; then swig=1; shift; fi
+if [ "$1" != "" ]; then echo "Usage: $0 [-t create test only...] [-q don't analyse API] [-s run swigging]"; exit 1; fi
+
+if [ $swig -eq 1 ]; then
+  if [ "$CLUCENE_INCLUDE" == "" ]; then echo "CLUCENE_INCLUDE environment variable is not set"; exit 1; fi
+
+  #TODO: -threads -O    -fvirtual
+  SWIG_OPTIONS="-c++ -Wall -fvirtual"
+  [ $testing -eq 1 ] && SWIG_OPTIONS="$SWIG_OPTIONS -DTESTING"
+  mkdir -p swig
+  set -x
+  ccache-swig swig -python $SWIG_OPTIONS -outdir swig -I$CLUCENE_INCLUDE -I../defs -o lucene++PYTHON_wrap.cxx ../../defs/clucene-bindings.i
+  if [ $? -ne 0 ]; then exit 1; fi
+ 
+ 
+  #function fixDirectorConstructor() {
+  #  search="boost::shared_ptr<\([\t ]*Lucene::$1[\t ]*\)> \*smartresult = result ? new boost::shared_ptr<.*>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;"
+  #  grep -G "$search" lucene++PYTHON_wrap.cxx
+  #  if [ $? -ne 0 ]; then
+  #    set +x
+  #    echo "###############################"
+  #    echo "$1 not found"
+  #    echo "###############################"
+  #    set -x
+  #  fi
+  #  #1 add delete so that when a lucene object is delete, the hold on the PyObject is released
+  #  #2 fix problem with typemap...
+  #  sed -e "s/$search/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW, arg1 != Py_None ? directorDeleter : normalDeleter) : 0;\/\/TODO: should only use normal \n    boost::detail::sp_enable_shared_from_this(smartresult);\n    (*smartresult)->initialize();\n    if ( arg1 != Py_None ) director_PyObject_Map.insert(std::pair<void*, PyObject*>(result,  arg1));/" \
+  #      -e "s/SWIGTYPE_boost__shared_ptrT_Lucene__$1_t,/SWIGTYPE_p_boost__shared_ptrT_Lucene__$1_t,/g" \
+  #     lucene++PYTHON_wrap.cxx -i
+  #  if [ $? -ne 0 ]; then exit -1; fi
+  #}
+  #first fix directors:
+  #fix director problems...
+  #1. Add INCREF to python in director ctor
+  #2. Add DECREF to python in director dtor
+  #sed -e '/Director(PyObject\* self).*$/a      Py_INCREF(swig_self);' \
+  #    -e '/~Director.*$/a      Py_DECREF(swig_self);' \
+  #    lucene++PYTHON_wrap.cxx -i
+  #if [ $? -ne 0 ]; then exit -1; fi
+  #awk '/DECLARE_DIRECTOR.*([A-Za-z0-9_]*\))$/ { print $3 }' ../../defs/lucene_fwd.i | while read line; do
+  # fixDirectorConstructor ${line%)}; 
+  #done
+  
+  #1. we need to use the newLucene() functions provided by lucene++, otherwise we have memory problems, and non-initialised code...
+  #2. Pointers to collections need to return a new object, because collections are not ref-counted, the original data might be gone when it comes to being used.
+  #3. Fix point 2 results...
+  #4. Fix point 2 non-boost results...
+  #5,6,7. These classes need to be constructed with newInstance...
+  sed -e 's/boost::shared_ptr<\([^><]*\)> \*smartresult = result ? new boost::shared_ptr<.*>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;\n    boost::detail::sp_enable_shared_from_this(smartresult);\n    (*smartresult)->initialize(); /' \
+      -e 's/resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Lucene__CollectionT_\(.*\)_t, 0 |  0 );/resultobj = SWIG_NewPointerObj((new Lucene::Collection< \1 >(static_cast< const Lucene::Collection< \1 >\& >(*result))), SWIGTYPE_p_Lucene__CollectionT_\1_t, SWIG_POINTER_OWN |  0 );/' \
+      -e 's/< boost__shared_ptrT_Lucene__\([A-Za-z0-9_]*\)_t >/< Lucene::\1Ptr >/g' \
+      -e 's/< Lucene__\([A-Za-z0-9_]*\) >/< Lucene::\1 >/g' \
+      -e 's/\(result = .*new Lucene::Collection\(.*\)();\)/\1\n      *result = Lucene::Collection\2::newInstance();/g' \
+      -e 's/\(result = .*new Lucene::HashMap\(.*\)();\)/\1\n      *result = Lucene::HashMap\2::newInstance();/g' \
+      -e 's/\(result = .*new Lucene::HashSet\(.*\)();\)/\1\n      *result = Lucene::HashSet\2::newInstance();/g' \
+      -e '/obj = tmp = PyUnicode_FromObject(obj);/a       if ( obj == NULL ) return SWIG_TypeError;' \
+         lucene++PYTHON_wrap.cxx -i
+  if [ $? -ne 0 ]; then exit -1; fi
+  
+  set +x
+ 
+  #copy wrapper into source code for source control
+  cat ../../LICENSE.c.inc lucene++PYTHON_wrap.cxx > ../lucene++PYTHON_wrap.cxx
+  cat ../../LICENSE.c.inc lucene++PYTHON_wrap.h > ../include/lucene++PYTHON_wrap.h
+  cat ../../LICENSE.py.inc swig/lucenepp.py > ../lucene.py
+fi
+
+#a funny copy "sort of replacement"
+# only copies files if md5sum of the tgt and dest are different or if dest does not exist
+#WARNING: for simplicity, the target is the first parameter... so the syntax is:
+#cp dest src1 src2
+function updateCp {
+  dest=$1
+  shift
+  
+  while [ "$1" != "" ]; do
+    src="$1"
+    shift
+    
+    if [ -d "$src" ]; then
+      PREF=${#src}
+      find $src -type f | while read line; do
+        _updateCp "$line" "${dest}$(basename $src)${line:$PREF}"
+      done
+    else
+      if [ -d "$dest" ]; then
+        _updateCp "$src" "${dest}$(basename $src)"
+      else
+        _updateCp "$src" "${dest}"
+      fi
+    fi
+  done
+}
+function _updateCp {
+  mkdir -p $(dirname $2)
+  if [ -f "$2" ]; then
+    md1="$(md5sum - < "$1")"
+    md2="$(md5sum - < "$2")"
+    if [ "$md1" != "$md2" ]; then
+      echo "copying $1 to $2 because md5 does not match"
+      diff -u "$2" "$1"
+      cp "$1" "$2"
+    fi
+  else
+    cp "$1" "$2"
+  fi
+}
+
+echo "TODO:"
+grep -o 'SwigValueWrapper<.*>' lucene++PYTHON_wrap.cxx|grep -v '<T>'|sort|uniq
+

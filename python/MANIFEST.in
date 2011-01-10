@@ -1,0 +1,8 @@
+include lucene++PYTHON_wrap.cxx
+include include
+include include/lucene++PYTHON_wrap.h
+include lucenepp.py
+include setup.py
+include test/*.py
+include README.txt
+
