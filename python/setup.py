@@ -6,7 +6,7 @@ setup.py file for clucene-bindings
 
 from distutils.core import setup, Extension
 
-lucenepp_module = Extension('_lucenepp',
+lucene_module = Extension('_lucene',
                            sources=['lucene++PYTHON_wrap.cxx'],
                            libraries=['lucene++'],
                            include_dirs=["include", "/usr/include/lucene++"]
@@ -20,8 +20,8 @@ setup (name = 'python-lucene++',
        license = "Apache Software License",
        long_description = """
        """,
-       ext_modules = [lucenepp_module],
-       py_modules = ["lucenepp"],
+       ext_modules = [lucene_module],
+       py_modules = ["lucene"],
        url = "http://www.github.com/ustramooner",
        classifiers=[
           'Development Status :: 3 - Alpha',
