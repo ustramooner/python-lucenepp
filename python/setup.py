@@ -6,14 +6,14 @@ setup.py file for clucene-bindings
 
 from distutils.core import setup, Extension
 
-lucene_module = Extension('_lucene',
+lucene_module = Extension('_lucenepp',
                            sources=['lucene++PYTHON_wrap.cxx'],
                            libraries=['lucene++'],
                            include_dirs=["include", "/usr/include/lucene++"]
                            )
 
 setup (name = 'python-lucene++',
-       version = '0.1',
+       version = '0.2',
        author      = "Ben van Klinken",
        author_email= "ustramooner@users.sourceforge.net",
        description = """Python bindings for Lucene++""",
