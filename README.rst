@@ -26,12 +26,15 @@ PyLucene users should find python-lucene++ very familiar, and there are very few
 changes necessary (see the section 'Porting your code from PyLucene' below)
 
 
-I N S T A L L
--------------
+P Y T H O N - I N S T A L L
+---------------------------
 You will need the following packages installed:
  * python (I have only tested 2.6.6 so far)
- * Lucene++ (get it from http://github.com/ustramooner/LucenePlusPlus)
- 
+ * Lucene++:
+   * Currently it's not in the mainstream, on Ubuntu you can use my PPA:
+     % sudo add-apt-repository ppa:ustramooner
+     % sudo apt-get install liblucene++-dev
+   * Get it from the original source from http://github.com/ustramooner/LucenePlusPlus
 
 # cd <python-lucenepp-dir>/python/
 # python setup.py install
@@ -58,10 +61,15 @@ changing something
 # mkdir build
 # cd build
 # cmake -DBindingLang=Python ../../
+# ln -s liblucenepp.so _lucenepp.so
+# export PYTHONPATH=`cd .. && pwd`:`pwd`
 
 Note that the generated swig file is gigantic, and you'll need a fair bit of memory
 to compile. It would be ideal to be able to split up the file, but swig has not
 such option currently.
+
+To run all the tests:
+# python ../test/BaseLuceneTestCase.py
 
 
 Porting your code from PyLucene
@@ -79,7 +87,7 @@ convienience methods like collect(doc, score) which python-lucene++ doesnt curre
 we have Locale("en_US.utf8") which is a thin wrapper around std::locale. It
 completely depends on what locale you have installed locally as to which locale
 will work. On linux you can type 'locale -a' to get a list of installed locales.
-  NOTE: currently there is a bug with dates and locales
+  NOTE: Lucene++ versions < 3.0.3b has a bug with dates and locales
 
 * There is no object.instance_(other). Use object.getClassName() == "OtherClassName"
 
