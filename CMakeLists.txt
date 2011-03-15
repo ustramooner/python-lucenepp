@@ -67,8 +67,8 @@ ELSE(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 #set clucene dir
-SET(CLUCENE_INCLUDE /home/ben/dev/lucenexx/lucene3/include)
-SET(CLUCENE_LIB /home/ben/dev/lucenexx/llvm2/bin/)
+include(FindPkgConfig)
+pkg_check_modules(CLUCENE REQUIRED liblucene++>=3.0.3)
 
 #create the swig target...
 file(GLOB_RECURSE lucene_i_sources
@@ -77,16 +77,17 @@ file(GLOB_RECURSE lucene_i_sources
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lucene++${BINDINGLang}_wrap.cxx
   COMMAND 
-    bash -c "CLUCENE_INCLUDE=${CLUCENE_INCLUDE} ../swigme -q -s"
+    bash -c "CLUCENE_INCLUDE=${CLUCENE_INCLUDE_DIRS} ../swigme -q -s"
   DEPENDS ${lucene_i_sources}
 )
 
-INCLUDE_DIRECTORIES(${CLUCENE_INCLUDE} ${LANGUAGE_INCLUDES})
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CLUCENE_CFLAGS})
+INCLUDE_DIRECTORIES(${LANGUAGE_INCLUDES})
 ADD_LIBRARY (
   lucenepp SHARED
   ${CMAKE_CURRENT_BINARY_DIR}/lucene++${BINDINGLang}_wrap.cxx
 )
-TARGET_LINK_LIBRARIES(lucenepp -llucene++ -L${CLUCENE_LIB})
+TARGET_LINK_LIBRARIES(lucenepp ${CLUCENE_LDFLAGS})
 
 ADD_CUSTOM_TARGET(
   clucene-binding
