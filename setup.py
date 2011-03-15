@@ -41,16 +41,25 @@ if len(inc_dirs) == 1:
 
 lib_dirs = []
 lib_dirs.extend(get_pkgconfig_value('--variable=libdir', 'liblucene++'))
- 
+if len(lib_dirs) == 0:
+  #TODO: remove this when pc file is fixed: 
+  lib_dirs.append('/usr/lib');
+
+
+luceneLibs = get_pkgconfig_value('--variable=lib', 'liblucene++')
+if len(luceneLibs) == 0:
+  #TODO: remove this when pc file is fixed: 
+  luceneLibs = ['lucene++']
+
 lucene_module = Extension('_lucenepp',
                            sources=[dirname + '/lucene++PYTHON_wrap.cxx'],
-                           libraries=get_pkgconfig_value('--variable=lib', 'liblucene++'),
+                           libraries=luceneLibs,
                            library_dirs=lib_dirs,
                            include_dirs=inc_dirs,
                            )
 
 setup (name = 'python-lucene++',
-       version = '0.2',
+       version = '0.4',
        author      = "Ben van Klinken",
        author_email= "ustramooner@users.sourceforge.net",
        description = """Python bindings for Lucene++""",
