@@ -38,7 +38,7 @@ if [ $swig -eq 1 ]; then
   #  fi
   #  #1 add delete so that when a lucene object is delete, the hold on the PyObject is released
   #  #2 fix problem with typemap...
-  #  sed -e "s/$search/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW, arg1 != Py_None ? directorDeleter : normalDeleter) : 0;\/\/TODO: should only use normal \n    boost::detail::sp_enable_shared_from_this(smartresult);\n    (*smartresult)->initialize();\n    if ( arg1 != Py_None ) director_PyObject_Map.insert(std::pair<void*, PyObject*>(result,  arg1));/" \
+  #  sed -e "s/$search/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW, arg1 != Py_None ? directorDeleter : normalDeleter) : 0;\/\/TODO: should only use normal \n    boost::detail::sp_enable_shared_from_this(smartresult);\n    try { (*smartresult)->initialize(); }_CATCHALL(); \n    if ( arg1 != Py_None ) director_PyObject_Map.insert(std::pair<void*, PyObject*>(result,  arg1));/" \
   #      -e "s/SWIGTYPE_boost__shared_ptrT_Lucene__$1_t,/SWIGTYPE_p_boost__shared_ptrT_Lucene__$1_t,/g" \
   #     lucene++PYTHON_wrap.cxx -i
   #  if [ $? -ne 0 ]; then exit -1; fi
@@ -60,7 +60,7 @@ if [ $swig -eq 1 ]; then
   #3. Fix point 2 results...
   #4. Fix point 2 non-boost results...
   #5,6,7. These classes need to be constructed with newInstance...
-  sed -e 's/boost::shared_ptr<\([^><]*\)> \*smartresult = result ? new boost::shared_ptr<.*>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;\n    boost::detail::sp_enable_shared_from_this(smartresult);\n    (*smartresult)->initialize(); /' \
+  sed -e 's/boost::shared_ptr<\([^><]*\)> \*smartresult = result ? new boost::shared_ptr<.*>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;/boost::shared_ptr<\1> \*smartresult = result ? new boost::shared_ptr<\1>(result SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW) : 0;\n    boost::detail::sp_enable_shared_from_this(smartresult);\n    try { (*smartresult)->initialize(); }_CATCHALL(); /' \
       -e 's/resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Lucene__CollectionT_\(.*\)_t, 0 |  0 );/resultobj = SWIG_NewPointerObj((new Lucene::Collection< \1 >(static_cast< const Lucene::Collection< \1 >\& >(*result))), SWIGTYPE_p_Lucene__CollectionT_\1_t, SWIG_POINTER_OWN |  0 );/' \
       -e 's/< boost__shared_ptrT_Lucene__\([A-Za-z0-9_]*\)_t >/< Lucene::\1Ptr >/g' \
       -e 's/< Lucene__\([A-Za-z0-9_]*\) >/< Lucene::\1 >/g' \

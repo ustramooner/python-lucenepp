@@ -309,10 +309,32 @@ ADD_GENERATOR( Lucene::Collection<Type>, __iter__,
 COLLECTION_STR_IN_TYPEMAP(String, PyString_Check, SWIG_AsPtr_Lucene_String, AsStringCollection, SWIG_TYPECHECK_STRING_ARRAY)
 
 
+%{
+  SWIGINTERN int
+  SWIG_AsVal_longLong (PyObject *obj, long long* val)
+  {
+    
+    if (PyLong_Check(obj)) {
+      long long v = PyLong_AsLongLong(obj);
+      if (!PyErr_Occurred()) {
+        if (val) *val = v;
+        return SWIG_OK;
+      } else {
+        PyErr_Clear();
+      }
+    }
+    //let default handling takeover...
+    long lval = 0;
+    int ret = SWIG_AsVal_long(obj, &lval);
+    *val = lval;
+    return ret;
+  }
+%}
 #built in types...
-COLLECTION_BI_IN_TYPEMAP(int32_t, PyInt_Check, SWIG_AsVal_int, AsIntCollection, SWIG_TYPECHECK_INT32_ARRAY)
+COLLECTION_BI_IN_TYPEMAP(int, PyInt_Check, SWIG_AsVal_int, AsIntCollection, SWIG_TYPECHECK_INT32_ARRAY)
 COLLECTION_BI_IN_TYPEMAP(double, PyFloat_Check, SWIG_AsVal_double, AsDoubleCollection, SWIG_TYPECHECK_DOUBLE_ARRAY)
-COLLECTION_BI_IN_TYPEMAP(int64_t, PyLong_Check, SWIG_AsVal_long, AsLongCollection, SWIG_TYPECHECK_INT64_ARRAY)
+//COLLECTION_BI_IN_TYPEMAP(long, PyLong_Check, SWIG_AsVal_long, AsLongCollection, SWIG_TYPECHECK_INT32_ARRAY)
+COLLECTION_BI_IN_TYPEMAP(long long, PyLong_Check, SWIG_AsVal_longLong, AsLongLongCollection, SWIG_TYPECHECK_INT64_ARRAY)
 
 
 #objects...
