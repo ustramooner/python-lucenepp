@@ -1,3 +1,5 @@
+P Y T H O N - L U C E N E + +
+-----------------------------
 This file is part of clucene-bindings
 
   Copyright 2011 Ben van Klinken
@@ -14,55 +16,40 @@ This file is part of clucene-bindings
   See the License for the specific language governing permissions and
   limitations under the License.
 
-python-lucene++
+The lucene module is an extensive set of bindings around Lucene++ (http://github.com/ustramooner/LucenePlusPlus/)
 
-The lucene module is an extensive set of bindings around Lucene++  
-  (http://github.com/ustramooner/LucenePlusPlus/)
-  
 After installing, have a look at the samples and test folder to
 see how to create your first python-lucene++ app. 
 
 PyLucene users should find python-lucene++ very familiar, and there are very few 
 changes necessary (see the section 'Porting your code from PyLucene' below)
 
+Ubuntu Packages
+-----------------------------
+Ubuntu packages are available from my ppa. To get them, run:
 
-I N S T A L L
--------------
+ sudo add-apt-repository ppa:ustramooner
+ 
+ sudo apt-get update
+ 
+ sudo apt-get install python-lucenepp
+
+
+Installing from source
+-------------------------------------
 You will need the following packages installed:
  * python (I have only tested 2.6.6 so far)
  * Lucene++ (get it from http://github.com/ustramooner/LucenePlusPlus)
- 
-
-# cd <python-lucene++-dir>/python/
-# python setup.py install
+   # cd <python-lucene++-dir>/python/
+   # python setup.py install
 
 It is better to use a package, so that you can remove it:
-# python setup.py bdist_rpm
+ # python setup.py bdist_rpm
 
 If you are on a debian system, convert the rpm into a deb
-# fakeroot alien --to-deb `ls python-lucene++-*.rpm|grep -v src`
+ # fakeroot alien --to-deb `ls python-lucene++-*.rpm|grep -v src`
 
 Then install the resulting rpm or deb from the `dist` folder.
-
-
-H A C K I N G
--------------
-If you want to make changes to the code, you will need the full source distribution,
-you can find that at https://github.com/ustramooner/python-lucene++.
-You will also need cmake 2.8+ and swig version 2.0.1.
-Note that different swig versions are known to create changes that break the system.
-If you use another version, be sure to do a diff of what gets created before actually 
-changing something
-
-# cd <python-lucene++-dir>/python/
-# mkdir build
-# cd build
-# cmake -DBindingLang=Python ../../
-
-Note that the generated swig file is gigantic, and you'll need a fair bit of memory
-to compile. It would be ideal to be able to split up the file, but swig has not
-such option currently.
-
 
 Porting your code from PyLucene
 -------------------------------
@@ -83,8 +70,28 @@ will work. On linux you can type 'locale -a' to get a list of installed locales.
 
 * There is no object.instance_(other). Use object.getClassName() == "OtherClassName"
 
+H A C K I N G
+-------------
+If you want to make changes to the code, you will need the full source distribution,
+you can find that at https://github.com/ustramooner/clucene-bindings
+You will also need cmake 2.8+ and swig version 2.0.1.
+Note that different swig versions are known to create changes that break the system.
+If you use another version, be sure to do a diff of what gets created before actually 
+changing something
 
-K N O W N  B U G S
+ # cd <python-lucene++-dir>/python/
+
+ # mkdir build
+
+ # cd build
+
+ # cmake -DBindingLang=Python ../../
+
+Note that the generated swig file is gigantic, and you'll need a fair bit of memory
+to compile. It would be ideal to be able to split up the file, but swig has not
+such option currently.
+
+K N O W N   B U G S
 ------------------
 
 Swig has a few bugs with Python Directors and smart_ptrs. As a result there
