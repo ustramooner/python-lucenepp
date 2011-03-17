@@ -1,28 +1,12 @@
 P Y T H O N - L U C E N E + +
 -----------------------------
-This file is part of clucene-bindings
-
-  Copyright 2011 Ben van Klinken
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+This project is part of clucene-bindings (http://github.com/ustramooner/clucene-bindings)
 
 The lucene module is an extensive set of bindings around Lucene++ (http://github.com/ustramooner/LucenePlusPlus/)
 
-After installing, have a look at the samples and test folder to
-see how to create your first python-lucene++ app. 
+After installing, have a look at the samples and test folder to see how to create your first python-lucene++ app. 
 
-PyLucene users should find python-lucene++ very familiar, and there are very few 
-changes necessary (see the section 'Porting your code from PyLucene' below)
+PyLucene users should find python-lucene++ very familiar, and there are very few changes necessary (see the section 'Porting your code from PyLucene' below)
 
 Ubuntu Packages
 -----------------------------
@@ -55,7 +39,7 @@ Porting your code from PyLucene
 -------------------------------
 As long as your code runs on PyLucene 3, python-lucene++ will work with these changes:
 
-* Director classes (overridable classes) are not called Python* (PythonCollector, for example)
+* Director classes (overridable classes) are not called Python* (PythonCollector, for example) 
 They are just called by the real name. Also, some classes like PythonCollector have some
 convienience methods like collect(doc, score) which python-lucene++ doesnt currently have
 
@@ -66,7 +50,6 @@ convienience methods like collect(doc, score) which python-lucene++ doesnt curre
 we have Locale("en_US.utf8") which is a thin wrapper around std::locale. It
 completely depends on what locale you have installed locally as to which locale
 will work. On linux you can type 'locale -a' to get a list of installed locales.
-  NOTE: currently there is a bug with dates and locales
 
 * There is no object.instance_(other). Use object.getClassName() == "OtherClassName"
 
