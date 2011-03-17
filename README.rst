@@ -23,9 +23,11 @@ Installing from source
 -------------------------------------
 You will need the following packages installed:
  * python (I have only tested 2.6.6 so far)
- * Lucene++ (get it from http://github.com/ustramooner/LucenePlusPlus)
-   # cd <python-lucene++-dir>/python/
-   # python setup.py install
+ * Lucene++ (get it from http://github.com/ustramooner/LucenePlusPlus, or install the ubuntu package liblucene++-dev from ppa:ustramooner)
+ 
+ # cd <python-lucene++-dir>/python/
+ 
+ # python setup.py install
 
 It is better to use a package, so that you can remove it:
  # python setup.py bdist_rpm
