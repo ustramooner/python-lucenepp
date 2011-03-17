@@ -71,10 +71,21 @@ changing something
  # cd build
 
  # cmake -DBindingLang=Python ../../
+ 
+ # ln -s liblucenepp.so _lucenepp.so
 
 Note that the generated swig file is gigantic, and you'll need a fair bit of memory
 to compile. It would be ideal to be able to split up the file, but swig has not
 such option currently.
+
+Make python look for the module here since it's not installed.
+ # export PYTHONPATH=`pwd`:`cd ../ && pwd`
+
+Testing
+ * You'll need python-unittest2 installed
+ * Run:
+ # python ../test/BaseLuceneTestCase.py
+
 
 K N O W N   B U G S
 ------------------
@@ -96,11 +107,4 @@ are a few problems which you need to be aware of until these are fixed.
   
   This needs to be fixed in swig
 
-* QueryParser date parsing with locales fail. This is a problem in c++ where the
-  locale doesn't return a valid correct date format. This always returns no_order for me:
-  std::use_facet< std::time_get<wchar_t> >(locale).date_order()
-  
-  This needs to be fixed in Lucene++
-  
-  
 
